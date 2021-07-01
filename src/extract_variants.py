@@ -6,6 +6,8 @@ import requests
 import pandas as pd
 from pandas import read_csv
 from datetime import datetime
+from collections import OrderedDict
+import pickle
 from src.common import *
 
 
@@ -131,14 +133,23 @@ lineagequerylist = [
     """    
 ]
 
-def variant_names(lineagequerylist): 
-    from collections import OrderedDict
+def variant_names(DATAPATH,lineagequerylist): 
+    WIKIDATAPATH = os.path.join(DATAPATH,'from wikidata/')
     url = 'https://query.wikidata.org/sparql'
     headers = {'User-Agent': 'outbreak variant extraction bot (https://outbreak.info/; help@outbreak.info)'}
     variants = []
-    for query in lineagequerylist:
+    i=0
+    for i in range(len(lineagequerylist)):
+        query = lineagequerylist[i]
         params = {'format': 'json', 'query': query, 'headers':headers}
-        data = make_request(params)
+        r = make_request(params)
+        if r != 0 and r != None:
+            data = r.json()
+            with open(os.path.join(WIKIDATAPATH,str(i)+'.pickle'),'wb') as dumpfile:
+                pickle.dump(data,dumpfile)
+        else:
+            with open(os.path.join(WIKIDATAPATH,str(i)+'.pickle'),'rb') as loadfile:
+                data = pickle.load(loadfile)
         for item in data['results']['bindings']:
             try:
                 variants.append(OrderedDict({
@@ -156,6 +167,8 @@ def variant_names(lineagequerylist):
                 'name': item['itemLabel']['value'].strip(),
                 'alias': item['itemLabel']['value'].strip()
                 }))
+        i=i+1
+        time.sleep(1)
     wikivariants = pd.DataFrame(variants)
     wikivariants.drop_duplicates(keep='first',inplace=True)
     return(wikivariants)
@@ -172,8 +185,7 @@ def get_pango_lineages():
     return(lineages)
 
 
-def get_wiki_variants(lineagequerylist):
-    wikivariants = variant_names(lineagequerylist)
+def get_wiki_variants(DATAPATH,wikivariants):
     wikidict = {}
     i=0
     while i < len(wikivariants):
@@ -182,9 +194,10 @@ def get_wiki_variants(lineagequerylist):
     return(wikidict)
 
 
-def extract_lineages(RESULTSPATH, textdf, lineagequerylist, export=True):
+def extract_lineages(DATAPATH,RESULTSPATH, lineagequerylist, textdf, export=True):
     lineages = get_pango_lineages()
-    wikidict = get_wiki_variants(lineagequerylist)
+    wikivariants = variant_names(DATAPATH,lineagequerylist)
+    wikidict = get_wiki_variants(DATAPATH,wikivariants)
     masterlist = list(set(lineages).union(set(wikivariants['alias'].tolist())))
     regexlist = []
     for eachitem in masterlist:
