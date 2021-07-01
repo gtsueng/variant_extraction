@@ -94,11 +94,14 @@ def extract_mutations(RESULTSPATH, textdf, token_dict, export=True):
     mutationslist['gene_mentions'] = mutationslist['text'].str.findall(geneprots)
     mutationslist['gene_mentions'] = mutationslist['gene_mentions'].apply(lambda x: lowerlist(x)) 
     mutationsclean = mutationslist[['_id','name','date','mutations','gene_mentions']].copy()
+    humefactors = mutationslist.loc[mutationslist['text'].str.contains("polymorphism")].copy()
+    humefactors.drop_duplicates(keep="first",inplace=True)
+    humefactors.drop(columns=['abstract','text','description'],inplace=True)
     if export==True:
         mutationsclean.to_csv(os.path.join(RESULTSPATH,'mutations.tsv'),sep='\t',header=True)
-        return(mutationsclean)
+        humefactors.to_csv(os.path.join(RESULTSPATH,'polymorphisms.tsv'),sep='\t',header=True)
     else:
-        return(mutationsclean)
+        return(mutationsclean,humefactors)
     
 
 
@@ -213,6 +216,5 @@ def extract_lineages(DATAPATH,RESULTSPATH, lineagequerylist, textdf, export=True
     cleanlineageslist.drop_duplicates(keep='first',inplace=True)
     if export==True:
         cleanlineageslist.to_csv(os.path.join(RESULTSPATH,'lineages.tsv'),sep='\t',header=True)
-        return(cleanlineageslist)
     else:
         return(cleanlineageslist)
