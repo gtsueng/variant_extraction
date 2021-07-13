@@ -14,7 +14,7 @@ DATAPATH = os.path.join(script_path,'data/')
 RESULTSPATH = os.path.join(script_path,'results/')
 
 allids = get_pub_ids('all')
-metadf = batch_fetch_meta(allids)
+metadf = batch_fetch_dated_meta(allids)
 textdf = merge_texts(metadf)
 mutationsclean = extract_mutations(RESULTSPATH, textdf, token_dict, export=True)
 cleanlineageslist = extract_lineages(DATAPATH, RESULTSPATH, lineagequerylist, textdf, export=True)

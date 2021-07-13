@@ -80,6 +80,7 @@ def get_source_ids(source):
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
             idlist = tmpset.union(idlist2)
+            time.sleep(1)
             try:
                 scroll_id = response2['_scroll_id']
             except:
@@ -125,6 +126,7 @@ def get_query_ids(query):
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
             idlist = tmpset.union(idlist2)
+            time.sleep(1)
             try:
                 scroll_id = response2["_scroll_id"]
             except:
@@ -168,6 +170,7 @@ def batch_fetch_meta(idlist):
             cleanresult.drop_duplicates(subset='_id',keep="first", inplace=True)
             textdf = pd.concat((textdf,cleanresult))
         i=i+1
+        time.sleep(1)
     return(textdf)
 
  
@@ -204,6 +207,7 @@ def batch_fetch_keywords(idlist):
             cleanresult.drop_duplicates(subset='_id',keep="first", inplace=True)
             textdf = pd.concat((textdf,cleanresult))
         i=i+1
+        time.sleep(1)
     return(textdf)
 
 
