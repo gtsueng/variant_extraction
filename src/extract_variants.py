@@ -8,6 +8,7 @@ from pandas import read_csv
 from datetime import datetime
 from collections import OrderedDict
 import pickle
+import time
 from src.common import *
 
 
@@ -44,6 +45,7 @@ def batch_fetch_dated_meta(idlist):
             cleanresult.drop_duplicates(subset='_id',keep="first", inplace=True)
             textdf = pd.concat((textdf,cleanresult))
         i=i+1
+        time.sleep(1)
     return(textdf)
 
 
